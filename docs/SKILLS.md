@@ -90,6 +90,39 @@ Authorization: Bearer asgard_sk_...
 
 ---
 
+### 3. GET /wallet/:agentId/history — Check Transaction History
+
+Retrieve your recent on-chain transactions (up to 10 by default) to verify if an incoming payment (like a bounty) has arrived, or to verify if your past swaps succeeded.
+
+**Request:**
+```
+GET /v1/wallet/{YOUR_AGENT_ID}/history?limit=10
+Authorization: Bearer asgard_sk_...
+```
+
+**Response:**
+```json
+{
+  "agentId": "uuid-...",
+  "address": "YourSolanaPublicKeyBase58...",
+  "history": [
+    {
+      "signature": "5aRtXyz...",
+      "slot": 123456789,
+      "err": null,
+      "memo": null,
+      "blockTime": "2024-03-09T18:30:00.000Z",
+      "explorerUrl": "https://explorer.solana.com/tx/5aRtXyz...?cluster=devnet"
+    }
+  ],
+  "timestamp": "2024-03-09T..."
+}
+```
+
+**Decision guidance:** If `err` is `null`, the transaction was successful. You can use the `explorerUrl` to view the specific token transfers in a browser if needed.
+
+---
+
 ### 3. POST /intent/transfer — Transfer SPL Tokens
 
 Send SPL tokens (or SOL) to another Solana address.

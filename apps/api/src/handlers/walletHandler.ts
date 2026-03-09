@@ -67,5 +67,48 @@ export function createWalletRouter(vault: AsgardVault): Router {
         }
     });
 
+    /**
+     * GET /v1/wallet/:agentId/history
+     * Returns the recent transaction history for the agent's wallet.
+     */
+    router.get('/:agentId/history', requireAgentAuth, async (req: Request, res: Response) => {
+        try {
+            const { agentId } = req.params;
+            const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+
+            if (req.agent?.agentId !== agentId) {
+                res.status(403).json({ error: 'Forbidden', message: 'Agents can only query their own wallet.' });
+                return;
+            }
+
+            const connection = vault.getConnection();
+            const publicKey = vault.getAgentPublicKey(agentId);
+
+            // Fetch the last 'limit' signatures for this address
+            const signatures = await connection.getSignaturesForAddress(publicKey, { limit });
+
+            // In a production app, we would parse each parsed transaction for a human/AI-readable
+            // summary of the events (e.g. "Swapped 10 USDC for 0.05 SOL"). For now, we return the signatures.
+            const history = signatures.map(sig => ({
+                signature: sig.signature,
+                slot: sig.slot,
+                err: sig.err,
+                memo: sig.memo,
+                blockTime: sig.blockTime ? new Date(sig.blockTime * 1000).toISOString() : null,
+                explorerUrl: `https://explorer.solana.com/tx/${sig.signature}?cluster=${process.env.SOLANA_NETWORK || 'devnet'}`
+            }));
+
+            res.json({
+                agentId,
+                address: publicKey.toBase58(),
+                history,
+                timestamp: new Date().toISOString()
+            });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            res.status(500).json({ error: 'HistoryFetchFailed', message });
+        }
+    });
+
     return router;
 }

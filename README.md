@@ -2,7 +2,7 @@
 
 Asgard is a **Wallet-as-a-Service** that gives AI agents autonomous, policy-governed access to the Solana blockchain — without ever exposing a private key to the agent itself.
 
-Built for the [Superteam AI Agent Wallet Bounty](https://superteam.fun).
+Built for the [Superteam AI Agent Wallet Bounty](https://superteam.fun/earn/listing/defi-developer-challenge-agentic-wallets-for-ai-agents).
 
 ---
 

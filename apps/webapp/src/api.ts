@@ -60,6 +60,11 @@ export async function fetchBalance(agentId: string, apiKey: string): Promise<{ a
     return data;
 }
 
+export async function fetchHistory(agentId: string, apiKey: string, limit: number = 10) {
+    const { data } = await api.get(`/v1/wallet/${agentId}/history?limit=${limit}`, { headers: agentHeaders(apiKey) });
+    return data;
+}
+
 export async function executeSwap(agentId: string, apiKey: string, payload: {
     inputToken: string; outputToken: string; amount: number; slippageBps: number;
 }) {

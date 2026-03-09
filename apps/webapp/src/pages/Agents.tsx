@@ -4,13 +4,13 @@ import {
     TrendingUp, TrendingDown, Layers, Wallet, Eye, EyeOff,
     AlertTriangle,
 } from 'lucide-react';
-import { fetchAgents, provisionAgent, fetchBalance, type Agent, type Balances } from '../api';
+import { fetchAgents, provisionAgent, fetchBalance, fetchHistory, type Agent, type Balances } from '../api';
 
 function shortAddr(addr: string) {
     return addr ? `${addr.slice(0, 6)}...${addr.slice(-4)}` : '—';
 }
 
-interface BalanceState { address: string; balances: Balances }
+interface BalanceState { address: string; balances: Balances; history: any[] }
 
 export default function Agents() {
     const [agents, setAgents] = useState<Agent[]>([]);
@@ -58,8 +58,11 @@ export default function Agents() {
         if (!watchId || !watchKey) return;
         setError('');
         try {
-            const b = await fetchBalance(watchId, watchKey);
-            setBalances(prev => ({ ...prev, [watchId]: b }));
+            const [b, h] = await Promise.all([
+                fetchBalance(watchId, watchKey),
+                fetchHistory(watchId, watchKey, 5) // Fetch last 5 transactions
+            ]);
+            setBalances(prev => ({ ...prev, [watchId]: { ...b, history: h.history || [] } }));
         } catch {
             setError('Failed to fetch balance. Check Agent ID and API key.');
         }
@@ -136,7 +139,7 @@ export default function Agents() {
             <div className="card">
                 <div className="card-header">
                     <span className="card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Wallet size={14} /> Check Balance
+                        <Wallet size={14} /> Check Balance & History
                     </span>
                 </div>
                 <div className="form-row">
@@ -155,16 +158,63 @@ export default function Agents() {
                     </div>
                 )}
                 {watchId && balances[watchId] && (
-                    <div className="alert info" style={{ marginTop: 12, gap: 16, flexWrap: 'wrap' }}>
-                        <span className="mono">{shortAddr(balances[watchId].address)}</span>
-                        {Object.entries(balances[watchId].balances).map(([t, v]) => (
-                            <span key={t}><strong>{t}</strong>: {Number(v).toFixed(4)}</span>
-                        ))}
-                    </div>
+                    <>
+                        <div className="alert info" style={{ marginTop: 12, gap: 16, flexWrap: 'wrap' }}>
+                            <span className="mono">{shortAddr(balances[watchId].address)}</span>
+                            {Object.entries(balances[watchId].balances).map(([t, v]) => (
+                                <span key={t}><strong>{t}</strong>: {Number(v).toFixed(4)}</span>
+                            ))}
+                        </div>
+
+                        {balances[watchId].history.length > 0 && (
+                            <div className="table-wrap" style={{ marginTop: 12 }}>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Status</th>
+                                            <th>Time</th>
+                                            <th>Signature</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {balances[watchId].history.map((tx, idx) => (
+                                            <tr key={idx}>
+                                                <td>
+                                                    {tx.err ? (
+                                                        <span style={{ color: 'var(--red)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                            <XCircle size={12} /> Failed
+                                                        </span>
+                                                    ) : (
+                                                        <span style={{ color: 'var(--green)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                            <CheckCircle2 size={12} /> Success
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td style={{ color: 'var(--muted)', fontSize: 13 }}>
+                                                    {tx.blockTime ? new Date(tx.blockTime).toLocaleString() : 'Recent'}
+                                                </td>
+                                                <td>
+                                                    <a href={tx.explorerUrl} target="_blank" rel="noreferrer"
+                                                        style={{ color: 'var(--accent)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                        {shortAddr(tx.signature)} <Eye size={12} />
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                        {balances[watchId].history.length === 0 && (
+                            <div style={{ padding: '12px 16px', fontSize: 13, color: 'var(--muted)', marginTop: 12, background: 'var(--surface2)', borderRadius: 8, textAlign: 'center' }}>
+                                No transactions found for this wallet.
+                            </div>
+                        )}
+                    </>
                 )}
                 <button className="btn btn-primary" style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 6 }}
                     onClick={handleCheckBalance} disabled={!watchId || !watchKey}>
-                    <Wallet size={13} /> Fetch Balance
+                    <Wallet size={13} /> Fetch Data
                 </button>
             </div>
 
