@@ -1,4 +1,4 @@
-# 🛡 Asgard — "Phantom for AI Agents"
+# 🛡 Asgard — "The Ultimate Wallet for AI Agents"
 
 Asgard is a **Local Companion Node** that gives AI agents autonomous, policy-governed access to the Solana blockchain — without ever exposing a private key to the agent itself. Think of it like a Phantom or Solflare wallet, but instead of a human clicking "Approve", the Asgard daemon enforces spending policies and signs for the local AI agent automatically.
 
