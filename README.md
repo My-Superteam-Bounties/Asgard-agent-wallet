@@ -55,7 +55,7 @@ Follow these exact steps to clone, build, and run the Asgard ecosystem locally.
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/My-Superteam-Bounties/Asgard-agent-wallet.git
+git clone https://github.com/My-Superteam-Bounties/Asgard-agentic-wallet.git
 cd asgard-agent-wallet
 ```
 
