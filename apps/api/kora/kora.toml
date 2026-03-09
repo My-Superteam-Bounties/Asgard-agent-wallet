@@ -7,17 +7,19 @@
 rate_limit = 100
 
 [kora.auth]
-hmac_secret = "kora_hmac_your-minimum-32-character-secret-here"
+hmac_secret = "MiUGIUs7AW57HlnSm9H0q30ItZBHNosx2mUlY7U6fYg="
 max_timestamp_age = 300
 
 [kora.cache]
 enabled = false   # Set to true with Redis in production
-# url = "redis://localhost:6379"
-# default_ttl = 300
-# account_ttl = 60
+url = "redis://localhost:6379"
+default_ttl = 300
+account_ttl = 60
 
 [kora.usage_limit]
 enabled = false   # Enable with Redis for per-wallet limiting in production
+max_transactions = 100
+fallback_if_unavailable = true
 
 [kora.enabled_methods]
 liveness = true
@@ -31,8 +33,8 @@ get_config = true
 get_payer_signer = true
 
 [validation]
-# Use Jupiter for real-time USD-equivalent fee pricing
-price_source = "Jupiter"
+# Use Mock pricing for prototype to avoid JUPITER_API_KEY requirement
+price_source = "Mock"
 
 # Conservative limits suitable for devnet prototype
 max_allowed_lamports = 5000000   # 0.005 SOL max fee per transaction

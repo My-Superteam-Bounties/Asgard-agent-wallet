@@ -1,9 +1,10 @@
-[signers]
-# The local testing signer strategy
-strategy = "SingleSigner"
+[signer_pool]
+strategy = "round_robin"
 
-[signers.local]
+[[signers]]
+name = "local_payer"
 # This defines the fee payer wallet that the Kora node uses
-type = "Local"
-# For testing/devnet, we can point to a standard solana cli keypair
-path = "~/.asgard/keys/kora-signer.json"
+type = "memory"
+weight = 1
+# Load the strict key mapping directly from the CLI environment
+private_key_env = "KORA_SPONSOR_PRIVATE_KEY"
