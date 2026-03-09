@@ -1,125 +1,156 @@
-# 🛡 Asgard — "The Ultimate Wallet for AI Agents"
+![Asgard Logo](https://github.com/user-attachments/assets/78dbc377-a060-4afe-92cd-d2a95c4794d6)
+
+# Asgard — Institutional-Grade Agentic Wallet-as-a-Service
 
 Asgard is a **Local Companion Node** that gives AI agents autonomous, policy-governed access to the Solana blockchain — without ever exposing a private key to the agent itself. Think of it like a Phantom or Solflare wallet, but instead of a human clicking "Approve", the Asgard daemon enforces spending policies and signs for the local AI agent automatically.
 
-Built for the [Superteam AI Agent Wallet Bounty](https://superteam.fun/earn/listing/defi-developer-challenge-agentic-wallets-for-ai-agents).
+Built specifically for the **Superteam AI Agent Wallet Bounty**.
 
 ---
 
-## The Two CLIs
+## 🏆 Bounty Requirements Checklist
 
-When you install Asgard, you get two distinct CLI tools:
+This project proudly fulfills every single requirement of the Superteam Bounty:
 
-1. **`asgard`** (The Human Operator): You use this to configure your Master Password, boot the background daemon, and view the web dashboard.
-2. **`x-wallet`** (The AI Agent): The AI agent uses this in its shell environment to execute trades, transfers, and wallet generation programmatically. It outputs strictly formatted JSON.
+- [x] **Create a wallet programmatically:** Agents use the `x-wallet provision` tool to generate AES-256-GCM encrypted keypairs on the fly.
+- [x] **Sign transactions automatically:** The local Asgard daemon decrypts the vault in-memory, signs the transaction, and zeroes the memory. The AI agent never touches the raw private key.
+- [x] **Hold SOL or SPL tokens:** The `x-wallet transfer` tool allows agents to autonomously send and receive SOL/USDC on the Devnet.
+- [x] **Interact with a protocol:** We interact intimately with the SPL Token Program and System Program.
+- [x] **Multi-Agent Test Harness (Working Prototype):** Run `npm run demo` to watch 3 distinct AI Agents provision wallets, request funding, and autonomously trade with each other in an infinite loop.
+- [x] **Open-source code:** You are looking at it! Full monorepo architecture.
+- [x] **Deep Dive & SKILLS.md:** Provided in the root directory.
 
 ---
 
-## How It Works
+## ✨ Key Features
 
+1. **Dual-Layer CLI System:** 
+   - `asgard` (Human CLI) configures the node, sets the Master Password, and boots the backend daemon.
+   - `x-wallet` (Agent CLI) provides structured JSON outputs dynamically designed to be invoked as a *LangChain* or *n8n* structured tool by LLMs.
+2. **Real-Time WebSockets Dashboard:** 
+   - Visit `http://localhost:8017` to view your fleet of agents.
+   - The React UI utilizes Socket.IO to stream live events. Watch as new agents are provisioned and transactions are executed in real-time.
+3. **Institutional Security Vault:** 
+   - AES-256-GCM encryption with PBKDF2 key derivation.
+   - Private keys are completely zeroed from the Node.js memory buffer within milliseconds of signing.
+4. **Auto-Injected Authentication:** 
+   - Zero-config dashboard. The daemon serves the React app and automatically injects authentication tokens for `localhost` requests, keeping it secure but frictionless for local operators.
+
+---
+
+## ⚙️ Prerequisites
+
+Before you begin, ensure you have the following installed on your machine:
+
+- **Node.js**: v18.0.0 or higher (v20+ recommended).
+- **pnpm**: Fast, disk space efficient package manager.
+  - To install pnpm: `npm install -g pnpm`
+- **Git**: To clone the repository.
+
+---
+
+## 🚀 Installation & Setup
+
+Follow these exact steps to clone, build, and run the Asgard ecosystem locally.
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/My-Superteam-Bounties/Asgard-agent-wallet.git
+cd asgard-agent-wallet
 ```
-AI Agent (n8n / LangChain / custom)
-        │  Executes CLI Intent  (e.g., x-wallet swap)
-        ▼
- ┌─────────────────────────────┐
- │    Local Asgard Daemon      │  ← validates, enforces policy
- │   Policy Engine  ·  Auth    │
- └────────────┬────────────────┘
-              │ approved
-              ▼
- ┌─────────────────────────────┐
- │       AsgardVault           │  ← only component that touches keys
- │  AES-256-GCM Keystore       │  ← private key never leaves
- └────────────┬────────────────┘
-              │ signed tx
-              ▼
- ┌─────────────────────────────┐
- │  Kora Gas Abstraction Node  │  ← co-signs as feePayer
- └────────────┬────────────────┘
-              │
-              ▼
-        Solana Blockchain
-```
 
----
-
-## Quick Start
-
-### 1. Build and Install Globally
-
-You (the human operator) build the project and link it globally so the `asgard` and `x-wallet` commands are available system-wide:
-
+### 2. Install Dependencies
+Using `pnpm` workspace functionality, install dependencies for all packages simultaneously:
 ```bash
 pnpm install
+```
+
+### 3. Build the Monorepo
+Compile the TypeScript source code for the API daemon, the React frontend, and the CLI tools:
+```bash
 pnpm build
+```
+
+*(Optional: Link globally so you can use `asgard` and `x-wallet` anywhere on your machine)*
+```bash
 npm install -g .
 ```
 
-### 2. Initialize the Local Node
+---
 
-Just like setting up Phantom, initialize Asgard securely on your machine:
+## 🎮 Running the Platform
+
+### Step 1: Initialize the Local Node
+Just like setting up Phantom for the first time, you need to initialize your secure vault:
 
 ```bash
-asgard
-# Select "Initialize Local Node"
+# If you didn't install globally, use: pnpm --filter @asgard/cli start init
+asgard init
 ```
+* **Security Prompt:** You will be forced to create a **Master Encryption Password**. It MUST be at least 16 characters long. This password encrypts the underlying wallets.
 
-This prompts you to create a **Master Encryption Password** (must be at least 16 characters) which encrypts all agent wallets via AES-256-GCM. It generates a secure `~/.asgard/.env` file containing your password and a random `ASGARD_NODE_KEY` used for authenticating your `x-wallet` commands.
-
-### 3. Start the Daemon
+### Step 2: Start the Daemon & Dashboard
+Boot the backend daemon. This starts the Express server, initializes the WebSocket streams, and serves the React dashboard.
 
 ```bash
-asgard
-# Select "Start Daemon"
+# If you didn't install globally, use: pnpm --filter @asgard/cli start start
+asgard start
 ```
-*The daemon boots in the background. Visit `http://localhost:3000` to view the React Dashboard.*
 
-### 4. Give the Agent the `x-wallet` CLI
+* **The Dashboard:** Open your browser and navigate to `http://localhost:8017`. You will see the beautiful Asgard control center.
 
-Now, your AI agent can provision its own wallet and execute transactions locally:
+### Step 3: Run the AI Agent Demo!
+To prove the system works, we built a Test Harness that fakes 3 autonomous bots interacting with Asgard.
+
+Leave your `asgard start` daemon running in one terminal. Open a **new terminal tab**, ensure you are in the root of this repository, and run:
 
 ```bash
-# Agent provisions a wallet
-x-wallet provision --name "Trading-Bot"
+npm run demo
+```
 
-# Agent executes a swap
-x-wallet swap --agent-id <UUID> --api-key <API_KEY> --in USDC --out SOL -a 10
+**What happens next?**
+1. Watch the terminal as 3 mock agents (`Alice-Trader`, `Bob-Liquidity`, `Charlie-Arber`) use the `x-wallet provision` tool to create secure wallets.
+2. Jump over to your Web Dashboard (`http://localhost:8017`). You will physically see the agents pop up in the "Registered Agents" table via Real-Time WebSockets!
+3. The script will pause and ask you to send Devnet SOL to one of the newly created addresses.
+4. Once funded, press Enter. The agents will enter an infinite loop, randomly transferring 0.001 SOL to each other using the `x-wallet transfer` tool.
+5. Watch the "Live Activity Feed" on your web dashboard light up green as the transactions succeed!
+
+---
+
+## 🧠 Integrating with Real AI (LangChain / n8n)
+
+The `x-wallet` CLI was explicitly designed to output deterministic JSON that an LLM can parse.
+
+If you are building an actual AI Agent using LangChain, you simply wrap the CLI in a Node.js `execSync` block:
+
+```typescript
+import { DynamicStructuredTool } from "@langchain/core/tools";
+import { execSync } from "child_process";
+
+export const ProvisionWalletTool = new DynamicStructuredTool({
+    name: "provision_wallet",
+    description: "Provisions a new secure Asgard wallet on Solana for this agent.",
+    schema: z.object({ agentName: z.string() }),
+    func: async ({ agentName }) => {
+        // AI Executes the Asgard CLI Tool!
+        const result = execSync(`x-wallet provision --name "${agentName}"`);
+        return JSON.parse(result).walletAddress;
+    },
+});
 ```
 
 ---
 
-## Key Features
+## 🛡 Security Architecture Deep Dive
 
-| Feature | Detail |
-|---|---|
-| **Programmatic wallet creation** | `x-wallet provision` — generates a fresh Solana keypair |
-| **Encrypted key storage** | AES-256-GCM with PBKDF2 key derivation, zeroed from memory after use |
-| **Policy engine** | Per-agent spend limits, program whitelists, velocity checks |
-| **Gasless transactions** | Kora node sponsors all network fees — agents need zero SOL |
-| **CLI agent interface** | The `x-wallet` command makes it trivial for AI to interact |
-| **React dashboard** | Served directly by the local daemon for human monitoring |
+Asgard treats AI agents as highly volatile, untrusted actors.
+
+1. **Isolation:** The agent running on `n8n` or a Python script never touches `./.asgard/keystore.json`. It only has an `Agent ID` and an `API Key`.
+2. **Ephemeral Decryption:** When an agent requests a signature via `x-wallet transfer`, the local Asgard Daemon validates the auth token. It briefly decrypts the AES-256-GCM keystore into a secure Node Buffer, signs the payload, and immediately calls `<Buffer>.fill(0)` to wipe the private key from RAM before V8 Garbage Collection even runs.
+3. **No Network Phishing:** Because Asgard runs locally on `localhost`, there is no risk of the agent being tricked into sending its intent to a malicious, spoofed RPC endpoint.
 
 ---
 
-## For Judges
+## 📄 License
 
-- **Deep dive:** [`docs/DESIGN.md`](docs/DESIGN.md)
-- **Agent API reference:** [`docs/SKILLS.md`](docs/SKILLS.md)
-
----
-
-## Security Model
-
-Asgard uses a **strict three-layer separation**:
-
-1. **The Brain** — AI agent, executes CLI commands, holds no key material
-2. **The Gateway** — Validates intents against per-agent policies
-3. **The Vault** — Decrypts and signs transiently, zeroes key bytes immediately
-
-Private keys are encrypted at rest with `AES-256-GCM`. The encryption key is derived with `PBKDF2` (210,000 iterations) from a master password stored in `~/.asgard/.env` — never in code.
-
----
-
-## License
-
-MIT
+MIT License. See `LICENSE` for details.
