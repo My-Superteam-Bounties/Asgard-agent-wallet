@@ -1,4 +1,4 @@
-![Asgard Logo](https://github.com/user-attachments/assets/78dbc377-a060-4afe-92cd-d2a95c4794d6)
+<img alt="Asgard Logo" src="https://github.com/user-attachments/assets/78dbc377-a060-4afe-92cd-d2a95c4794d6" width="200">
 
 # Asgard — Institutional-Grade Agentic Wallet-as-a-Service
 
