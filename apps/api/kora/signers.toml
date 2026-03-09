@@ -6,4 +6,4 @@ strategy = "SingleSigner"
 # This defines the fee payer wallet that the Kora node uses
 type = "Local"
 # For testing/devnet, we can point to a standard solana cli keypair
-path = "~/.config/solana/id.json"
+path = "~/.asgard/keys/kora-signer.json"

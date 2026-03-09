@@ -92,13 +92,21 @@ asgard init
 * **Security Prompt:** You will be forced to create a **Master Encryption Password**. It MUST be at least 16 characters long. This password encrypts the underlying wallets.
 
 ### Step 2: Start the Kora Paymaster Core
-Asgard achieves true gasless transactions by routing intents mapping to a fully functional **Kora JSON-RPC Server**. You must install the Kora CLI globally:
-```bash
-cargo install kora-cli
-```
+Asgard achieves true gasless transactions by routing intents mapping to a fully functional **Kora JSON-RPC Server**. To run this prototype locally, Judges must install the Kora CLI and fund a local operator keypair:
 
-Once installed, boot the paymaster using the pre-configured definitions in a dedicated terminal window:
 ```bash
+# 1. Install Kora CLI globally
+cargo install kora-cli
+
+# 2. Ensure you have a Solana CLI keypair (Kora uses this as the SOL fee payer)
+# We store this inside ~/.asgard to avoid overwriting your personal dev wallets!
+mkdir -p ~/.asgard/keys
+solana-keygen new -o ~/.asgard/keys/kora-signer.json --no-bip39-passphrase --force
+
+# 3. Fund your local fee payer with Devnet SOL so it can sponsor agent transactions
+solana airdrop 2 ~/.asgard/keys/kora-signer.json --url devnet
+
+# 4. Boot the paymaster using our pre-configured Kora definitions
 kora rpc start --config apps/api/kora/kora.toml --signers-config apps/api/kora/signers.toml
 ```
 
