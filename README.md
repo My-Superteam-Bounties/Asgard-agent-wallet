@@ -1,6 +1,6 @@
 <img alt="Asgard Logo" src="https://github.com/user-attachments/assets/78dbc377-a060-4afe-92cd-d2a95c4794d6" width="200">
 
-# Asgard — Institutional-Grade Agentic Wallet-as-a-Service
+# Asgard — Institutional-Grade Agentic Wallet
 
 Asgard is a **Local Companion Node** that gives AI agents autonomous, policy-governed access to the Solana blockchain — without ever exposing a private key to the agent itself. Think of it like a Phantom or Solflare wallet, but instead of a human clicking "Approve", the Asgard daemon enforces spending policies and signs for the local AI agent automatically.
 
