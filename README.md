@@ -45,6 +45,8 @@ Before you begin, ensure you have the following installed on your machine:
 - **Node.js**: v18.0.0 or higher (v20+ recommended).
 - **pnpm**: Fast, disk space efficient package manager.
   - To install pnpm: `npm install -g pnpm`
+- **Rust / Cargo**: Required to compile and run the Kora Node binary.
+  - To install Rust: `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
 - **Git**: To clone the repository.
 
 ---
@@ -89,7 +91,18 @@ asgard init
 ```
 * **Security Prompt:** You will be forced to create a **Master Encryption Password**. It MUST be at least 16 characters long. This password encrypts the underlying wallets.
 
-### Step 2: Start the Daemon & Dashboard
+### Step 2: Start the Kora Paymaster Core
+Asgard achieves true gasless transactions by routing intents mapping to a fully functional **Kora JSON-RPC Server**. You must install the Kora CLI globally:
+```bash
+cargo install kora-cli
+```
+
+Once installed, boot the paymaster using the pre-configured definitions in a dedicated terminal window:
+```bash
+kora rpc start --config apps/api/kora/kora.toml --signers-config apps/api/kora/signers.toml
+```
+
+### Step 3: Start the Daemon & Dashboard
 Boot the backend daemon. This starts the Express server, initializes the WebSocket streams, and serves the React dashboard.
 
 ```bash
@@ -99,7 +112,7 @@ asgard start
 
 * **The Dashboard:** Open your browser and navigate to `http://localhost:8017`. You will see the beautiful Asgard control center.
 
-### Step 3: Run the AI Agent Demo!
+### Step 4: Run the AI Agent Demo!
 To prove the system works, we built a Test Harness that fakes 3 autonomous bots interacting with Asgard.
 
 Leave your `asgard start` daemon running in one terminal. Open a **new terminal tab**, ensure you are in the root of this repository, and run:
