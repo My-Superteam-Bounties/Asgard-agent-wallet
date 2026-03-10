@@ -46,18 +46,28 @@ exports.updateAgentPolicy = updateAgentPolicy;
 exports.listAgents = listAgents;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const os = __importStar(require("os"));
 const crypto = __importStar(require("crypto"));
-const REGISTRY_FILE = path.resolve(process.cwd(), 'keystore', 'registry.json');
+const resolveKeystorePath = (p) => {
+    if (!p)
+        return path.join(os.homedir(), '.asgard', 'keystore');
+    if (p.startsWith('~/'))
+        return path.join(os.homedir(), p.slice(2));
+    return path.resolve(process.cwd(), p);
+};
+const getRegistryFile = () => path.join(resolveKeystorePath(process.env.KEYSTORE_PATH), 'registry.json');
 function loadRegistry() {
-    if (!fs.existsSync(REGISTRY_FILE))
+    const file = getRegistryFile();
+    if (!fs.existsSync(file))
         return {};
-    return JSON.parse(fs.readFileSync(REGISTRY_FILE, 'utf-8'));
+    return JSON.parse(fs.readFileSync(file, 'utf-8'));
 }
 function saveRegistry(registry) {
-    const dir = path.dirname(REGISTRY_FILE);
+    const file = getRegistryFile();
+    const dir = path.dirname(file);
     if (!fs.existsSync(dir))
         fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(REGISTRY_FILE, JSON.stringify(registry, null, 2), { mode: 0o600 });
+    fs.writeFileSync(file, JSON.stringify(registry, null, 2), { mode: 0o600 });
 }
 /**
  * Hashes an API key for safe storage. We never store the plaintext key.

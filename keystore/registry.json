@@ -16,5 +16,14 @@
     "policyProfile": "default",
     "createdAt": "2026-03-10T21:18:43.423Z",
     "active": true
+  },
+  "9273cddd-f25a-4eab-9df2-6c0984942b79": {
+    "agentId": "9273cddd-f25a-4eab-9df2-6c0984942b79",
+    "name": "Genz",
+    "publicKey": "yMrcx82TMVXpwvtfi71ah6j7Jgiugt8SYftPDaLu3vi",
+    "apiKeyHash": "bb1222a7c0eeb1eec6183414fdf9aa3b62c527e59f260728ec1a2d53876bc21d",
+    "policyProfile": "read_only",
+    "createdAt": "2026-03-10T23:34:29.830Z",
+    "active": true
   }
 }

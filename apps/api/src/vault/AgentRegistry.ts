@@ -6,6 +6,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 import * as crypto from 'crypto';
 import type { PolicyProfile } from '../policy/PolicyEngine';
 
@@ -20,17 +21,25 @@ export interface AgentRecord {
     active: boolean;
 }
 
-const REGISTRY_FILE = path.resolve(process.cwd(), 'keystore', 'registry.json');
+const resolveKeystorePath = (p?: string) => {
+    if (!p) return path.join(os.homedir(), '.asgard', 'keystore');
+    if (p.startsWith('~/')) return path.join(os.homedir(), p.slice(2));
+    return path.resolve(process.cwd(), p);
+};
+
+const getRegistryFile = () => path.join(resolveKeystorePath(process.env.KEYSTORE_PATH), 'registry.json');
 
 function loadRegistry(): Record<string, AgentRecord> {
-    if (!fs.existsSync(REGISTRY_FILE)) return {};
-    return JSON.parse(fs.readFileSync(REGISTRY_FILE, 'utf-8')) as Record<string, AgentRecord>;
+    const file = getRegistryFile();
+    if (!fs.existsSync(file)) return {};
+    return JSON.parse(fs.readFileSync(file, 'utf-8')) as Record<string, AgentRecord>;
 }
 
 function saveRegistry(registry: Record<string, AgentRecord>): void {
-    const dir = path.dirname(REGISTRY_FILE);
+    const file = getRegistryFile();
+    const dir = path.dirname(file);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(REGISTRY_FILE, JSON.stringify(registry, null, 2), { mode: 0o600 });
+    fs.writeFileSync(file, JSON.stringify(registry, null, 2), { mode: 0o600 });
 }
 
 /**
