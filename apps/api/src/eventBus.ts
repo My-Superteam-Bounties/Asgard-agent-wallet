@@ -39,6 +39,7 @@ export type AsgardEventType =
     | 'wallet:history:queried'
     // Policy
     | 'policy:violation'
+    | 'agent:policy:updated'
     // Gateway lifecycle
     | 'gateway:started'
     | 'gateway:stopped';

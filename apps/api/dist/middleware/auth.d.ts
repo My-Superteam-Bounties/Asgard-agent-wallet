@@ -22,3 +22,8 @@ export declare function requireAgentAuth(req: Request, res: Response, next: Next
  * Validates the Asgard Node Key for agent provisioning endpoints.
  */
 export declare function requireNodeAuth(req: Request, res: Response, next: NextFunction): void;
+/**
+ * Dual authentication middleware.
+ * Allows either the Node Key (Admin) or the Agent API Key.
+ */
+export declare function requireNodeOrAgentAuth(req: Request, res: Response, next: NextFunction): void;

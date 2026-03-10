@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { AsgardVault } from '../vault/AsgardVault';
-import { registerAgent, listAgents, getAgentById } from '../vault/AgentRegistry';
+import { registerAgent, listAgents, getAgentById, updateAgentPolicy } from '../vault/AgentRegistry';
 import { PolicyEngine } from '../policy/PolicyEngine';
 import { requireNodeAuth, requireAgentAuth } from '../middleware/auth';
 import { eventBus } from '../eventBus';
@@ -18,6 +18,17 @@ type PolicyProfileName = typeof VALID_PROFILES[number];
 const CreateAgentSchema = z.object({
     name: z.string().min(1).max(64),
     policyProfile: z.enum(VALID_PROFILES).default('default'),
+});
+
+const CustomPolicySchema = z.object({
+    maxDailySpendUSDC: z.number().optional(),
+    maxSingleTxUSDC: z.number().optional(),
+    maxTransactionsPerMinute: z.number().optional(),
+    maxTransactionsPerDay: z.number().optional(),
+    allowedPrograms: z.array(z.string()).optional(),
+    allowedTokens: z.array(z.string()).optional(),
+    allowTransfers: z.boolean().optional(),
+    allowSwaps: z.boolean().optional(),
 });
 
 export function createAgentRouter(vault: AsgardVault, policy: PolicyEngine): Router {
@@ -127,6 +138,34 @@ export function createAgentRouter(vault: AsgardVault, policy: PolicyEngine): Rou
         } catch (err: unknown) {
             const message = err instanceof Error ? err.message : String(err);
             res.status(500).json({ error: 'LookupFailed', message });
+        }
+    });
+
+    /**
+     * PUT /v1/agents/:agentId/policy
+     * Admin route to override specific policy limits for a given agent.
+     */
+    router.put('/:agentId/policy', requireNodeAuth, (req: Request, res: Response) => {
+        try {
+            const { agentId } = req.params;
+            const parsed = CustomPolicySchema.safeParse(req.body);
+            if (!parsed.success) {
+                res.status(400).json({ error: 'ValidationError', details: parsed.error.issues });
+                return;
+            }
+
+            const success = updateAgentPolicy(agentId as string, parsed.data);
+            if (!success) {
+                res.status(404).json({ error: 'NotFound', message: `Agent ${agentId} not found.` });
+                return;
+            }
+
+            res.json({ success: true, message: `Successfully updated custom policy for ${agentId}.` });
+
+            eventBus.emitEvent('agent:policy:updated' as any, { agentId });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            res.status(500).json({ error: 'PolicyUpdateFailed', message });
         }
     });
 

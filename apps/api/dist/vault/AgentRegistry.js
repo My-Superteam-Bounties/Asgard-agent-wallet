@@ -42,6 +42,7 @@ exports.hashApiKey = hashApiKey;
 exports.registerAgent = registerAgent;
 exports.findAgentByApiKey = findAgentByApiKey;
 exports.getAgentById = getAgentById;
+exports.updateAgentPolicy = updateAgentPolicy;
 exports.listAgents = listAgents;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
@@ -67,7 +68,7 @@ function hashApiKey(apiKey) {
 /**
  * Registers a new agent in the registry.
  */
-function registerAgent(agentId, name, publicKey, apiKey, policyProfile) {
+function registerAgent(agentId, name, publicKey, apiKey, policyProfile, customPolicy) {
     const registry = loadRegistry();
     registry[agentId] = {
         agentId,
@@ -75,6 +76,7 @@ function registerAgent(agentId, name, publicKey, apiKey, policyProfile) {
         publicKey,
         apiKeyHash: hashApiKey(apiKey),
         policyProfile,
+        ...(customPolicy ? { customPolicy } : {}),
         createdAt: new Date().toISOString(),
         active: true,
     };
@@ -96,6 +98,20 @@ function findAgentByApiKey(apiKey) {
 function getAgentById(agentId) {
     const registry = loadRegistry();
     return registry[agentId] || null;
+}
+/**
+ * Updates an agent's custom policy overrides.
+ */
+function updateAgentPolicy(agentId, customPolicy) {
+    const registry = loadRegistry();
+    if (!registry[agentId])
+        return false;
+    registry[agentId].customPolicy = {
+        ...(registry[agentId].customPolicy || {}),
+        ...customPolicy
+    };
+    saveRegistry(registry);
+    return true;
 }
 /**
  * Lists all registered agents (for admin/monitoring endpoints).

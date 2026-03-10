@@ -9,8 +9,9 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { getAgentById } from '../vault/AgentRegistry';
 
-interface PolicyProfile {
+export interface PolicyProfile {
     description: string;
     maxDailySpendUSDC: number;
     maxSingleTxUSDC: number;
@@ -116,7 +117,7 @@ export class PolicyEngine {
         policyProfile: string,
         intent: IntentRequest
     ): PolicyCheckResult {
-        const policy = this.policies[policyProfile];
+        let policy = this.policies[policyProfile];
         if (!policy) {
             return {
                 allowed: false,
@@ -125,6 +126,12 @@ export class PolicyEngine {
                     message: `Policy profile '${policyProfile}' not found.`,
                 },
             };
+        }
+
+        // Apply any custom per-agent policy overrides
+        const agentRecord = getAgentById(agentId);
+        if (agentRecord?.customPolicy) {
+            policy = { ...policy, ...agentRecord.customPolicy };
         }
 
         const usage = getAgentUsage(agentId);

@@ -5,6 +5,7 @@ import {
     AlertTriangle,
 } from 'lucide-react';
 import { fetchAgents, provisionAgent, fetchBalance, fetchHistory, type Agent, type Balances } from '../api';
+import AgentDetail from './AgentDetail';
 
 import type { AsgardEvent } from '../hooks/useSocket';
 
@@ -21,6 +22,7 @@ interface Props {
 export default function Agents({ socketEvents = [] }: Props) {
     const [agents, setAgents] = useState<Agent[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [result, setResult] = useState<{ apiKey: string; agentId: string; walletAddress: string } | null>(null);
     const [balances, setBalances] = useState<Record<string, BalanceState>>({});
@@ -89,6 +91,10 @@ export default function Agents({ socketEvents = [] }: Props) {
             : p === 'read_only' ? <Layers size={10} style={{ marginRight: 3 }} />
                 : <TrendingDown size={10} style={{ marginRight: 3 }} />;
 
+    if (selectedAgentId) {
+        return <AgentDetail agentId={selectedAgentId} onBack={() => setSelectedAgentId(null)} />;
+    }
+
     return (
         <div className="gap-16">
             {/* Header */}
@@ -138,13 +144,20 @@ export default function Agents({ socketEvents = [] }: Props) {
                                         </td>
                                         <td>
                                             <span className={`pill ${pillClass(a.policyProfile)}`}>
-                                                <PillIcon p={a.policyProfile} />{a.policyProfile}
+                                                <PillIcon p={a.policyProfile} />
+                                                {a.policyProfile}
                                             </span>
                                         </td>
-                                        <td style={{ color: 'var(--muted)' }}>{new Date(a.createdAt).toLocaleDateString()}</td>
+                                        <td className="mono" style={{ color: 'var(--muted)', fontSize: 11 }}>
+                                            {new Date(a.createdAt).toLocaleDateString()}
+                                        </td>
+                                        <td style={{ textAlign: 'right' }}>
+                                            <button className="btn btn-ghost" onClick={() => setSelectedAgentId(a.agentId)} style={{ padding: '6px 12px' }}>
+                                                View <Eye size={12} style={{ marginLeft: 6 }} />
+                                            </button>
+                                        </td>
                                     </tr>
-                                ))}
-                            </tbody>
+                                ))}</tbody>
                         </table>
                     </div>
                 )}

@@ -59,6 +59,26 @@ export async function provisionAgent(name: string, policyProfile: string) {
     return data;
 }
 
+export async function fetchAgentDetails(agentId: string) {
+    const { data } = await api.get(`/v1/agents/${agentId}`, { headers: nodeHeaders() });
+    return data;
+}
+
+export async function fetchAgentBalance(agentId: string) {
+    const { data } = await api.get(`/v1/wallet/${agentId}/balance`, { headers: nodeHeaders() });
+    return data;
+}
+
+export async function fetchAgentHistory(agentId: string) {
+    const { data } = await api.get(`/v1/wallet/${agentId}/history?limit=20`, { headers: nodeHeaders() });
+    return data;
+}
+
+export async function updateAgentPolicy(agentId: string, customPolicy: any) {
+    const { data } = await api.put(`/v1/agents/${agentId}/policy`, customPolicy, { headers: nodeHeaders() });
+    return data;
+}
+
 export async function fetchBalance(agentId: string, apiKey: string): Promise<{ address: string; balances: Balances }> {
     const { data } = await api.get(`/v1/wallet/${agentId}/balance`, { headers: agentHeaders(apiKey) });
     return data;

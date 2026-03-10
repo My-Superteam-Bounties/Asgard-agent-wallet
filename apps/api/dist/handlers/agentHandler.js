@@ -16,6 +16,16 @@ const CreateAgentSchema = zod_1.z.object({
     name: zod_1.z.string().min(1).max(64),
     policyProfile: zod_1.z.enum(VALID_PROFILES).default('default'),
 });
+const CustomPolicySchema = zod_1.z.object({
+    maxDailySpendUSDC: zod_1.z.number().optional(),
+    maxSingleTxUSDC: zod_1.z.number().optional(),
+    maxTransactionsPerMinute: zod_1.z.number().optional(),
+    maxTransactionsPerDay: zod_1.z.number().optional(),
+    allowedPrograms: zod_1.z.array(zod_1.z.string()).optional(),
+    allowedTokens: zod_1.z.array(zod_1.z.string()).optional(),
+    allowTransfers: zod_1.z.boolean().optional(),
+    allowSwaps: zod_1.z.boolean().optional(),
+});
 function createAgentRouter(vault, policy) {
     const router = (0, express_1.Router)();
     /**
@@ -106,6 +116,31 @@ function createAgentRouter(vault, policy) {
         catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             res.status(500).json({ error: 'LookupFailed', message });
+        }
+    });
+    /**
+     * PUT /v1/agents/:agentId/policy
+     * Admin route to override specific policy limits for a given agent.
+     */
+    router.put('/:agentId/policy', auth_1.requireNodeAuth, (req, res) => {
+        try {
+            const { agentId } = req.params;
+            const parsed = CustomPolicySchema.safeParse(req.body);
+            if (!parsed.success) {
+                res.status(400).json({ error: 'ValidationError', details: parsed.error.issues });
+                return;
+            }
+            const success = (0, AgentRegistry_1.updateAgentPolicy)(agentId, parsed.data);
+            if (!success) {
+                res.status(404).json({ error: 'NotFound', message: `Agent ${agentId} not found.` });
+                return;
+            }
+            res.json({ success: true, message: `Successfully updated custom policy for ${agentId}.` });
+            eventBus_1.eventBus.emitEvent('agent:policy:updated', { agentId });
+        }
+        catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            res.status(500).json({ error: 'PolicyUpdateFailed', message });
         }
     });
     return router;

@@ -7,6 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as crypto from 'crypto';
+import type { PolicyProfile } from '../policy/PolicyEngine';
 
 export interface AgentRecord {
     agentId: string;
@@ -14,6 +15,7 @@ export interface AgentRecord {
     publicKey: string;
     apiKeyHash: string;   // SHA-256 hash of the raw API key (never store plaintext)
     policyProfile: string;
+    customPolicy?: Partial<PolicyProfile>;
     createdAt: string;
     active: boolean;
 }
@@ -46,7 +48,8 @@ export function registerAgent(
     name: string,
     publicKey: string,
     apiKey: string,
-    policyProfile: string
+    policyProfile: string,
+    customPolicy?: Partial<PolicyProfile>
 ): void {
     const registry = loadRegistry();
     registry[agentId] = {
@@ -55,6 +58,7 @@ export function registerAgent(
         publicKey,
         apiKeyHash: hashApiKey(apiKey),
         policyProfile,
+        ...(customPolicy ? { customPolicy } : {}),
         createdAt: new Date().toISOString(),
         active: true,
     };
@@ -80,6 +84,21 @@ export function findAgentByApiKey(apiKey: string): AgentRecord | null {
 export function getAgentById(agentId: string): AgentRecord | null {
     const registry = loadRegistry();
     return registry[agentId] || null;
+}
+
+/**
+ * Updates an agent's custom policy overrides.
+ */
+export function updateAgentPolicy(agentId: string, customPolicy: Partial<PolicyProfile>): boolean {
+    const registry = loadRegistry();
+    if (!registry[agentId]) return false;
+
+    registry[agentId].customPolicy = {
+        ...(registry[agentId].customPolicy || {}),
+        ...customPolicy
+    };
+    saveRegistry(registry);
+    return true;
 }
 
 /**

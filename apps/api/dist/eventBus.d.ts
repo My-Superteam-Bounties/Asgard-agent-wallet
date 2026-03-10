@@ -17,7 +17,7 @@ export interface AsgardEvent {
     /** Event payload — shape varies by event type */
     payload: Record<string, unknown>;
 }
-export type AsgardEventType = 'agent:provisioned' | 'agent:listed' | 'agent:queried' | 'intent:swap:pending' | 'intent:swap:success' | 'intent:swap:failed' | 'intent:transfer:pending' | 'intent:transfer:success' | 'intent:transfer:failed' | 'wallet:balance:queried' | 'wallet:history:queried' | 'policy:violation' | 'gateway:started' | 'gateway:stopped';
+export type AsgardEventType = 'agent:provisioned' | 'agent:listed' | 'agent:queried' | 'intent:swap:pending' | 'intent:swap:success' | 'intent:swap:failed' | 'intent:transfer:pending' | 'intent:transfer:success' | 'intent:transfer:failed' | 'wallet:balance:queried' | 'wallet:history:queried' | 'policy:violation' | 'agent:policy:updated' | 'gateway:started' | 'gateway:stopped';
 declare class AsgardEventBus extends EventEmitter {
     private static instance;
     private constructor();

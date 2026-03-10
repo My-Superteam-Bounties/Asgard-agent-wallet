@@ -176,7 +176,9 @@ Asgard treats AI agents as highly volatile, untrusted actors.
 
 While AI agents independently formulate transactions, the Asgard node strictly enforces immutable boundaries on their behavior before signing payload intents. 
 
-Humans maintain complete control over these constraints via the `apps/api/config/agent_policies.json` configuration file. You can define multiple distinct profiles (e.g., `default`, `read_only`, `high_volume`) and aggressively tune:
+**Note for Node Operators**: Humans maintain complete control over these constraints via the **React Web Dashboard**. Rather than manually hacking the raw backend configurations in `apps/api/config/agent_policies.json`, administrators can seamlessly click into any Agent inside the Localhost Dashboard.
+
+Using the visual **Security Limits** panel, humans can natively override an agent's configured profile template by arbitrarily modifying their:
 - **Velocity Limits:** Restrict the maximum number of transactions an agent is allowed to execute per minute or day (`maxTransactionsPerMinute`).
 - **Volume Ceilings:** Specify strict single-transaction and daily maximum spend amounts in USDC (`maxDailySpendUSDC`).
 - **Protocol Whitelists:** Explicitly lock agents down to specific smart contract programs and token mints (`allowedPrograms`, `allowedTokens`).

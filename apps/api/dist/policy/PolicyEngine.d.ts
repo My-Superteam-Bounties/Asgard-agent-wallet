@@ -6,6 +6,17 @@
  * The Brain (AI agent) decides WHAT to do.
  * The PolicyEngine decides IF it is PERMITTED.
  */
+export interface PolicyProfile {
+    description: string;
+    maxDailySpendUSDC: number;
+    maxSingleTxUSDC: number;
+    maxTransactionsPerMinute: number;
+    maxTransactionsPerDay: number;
+    allowedPrograms: string[];
+    allowedTokens: string[];
+    allowTransfers: boolean;
+    allowSwaps: boolean;
+}
 export type PolicyViolationCode = 'SPEND_LIMIT_EXCEEDED' | 'DAILY_TX_LIMIT_EXCEEDED' | 'VELOCITY_LIMIT_EXCEEDED' | 'PROGRAM_NOT_WHITELISTED' | 'TOKEN_NOT_ALLOWED' | 'ACTION_NOT_PERMITTED' | 'UNKNOWN_POLICY';
 export interface PolicyViolation {
     code: PolicyViolationCode;

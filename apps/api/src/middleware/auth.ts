@@ -86,3 +86,38 @@ export function requireNodeAuth(
 
     next();
 }
+
+/**
+ * Dual authentication middleware.
+ * Allows either the Node Key (Admin) or the Agent API Key.
+ */
+export function requireNodeOrAgentAuth(
+    req: Request,
+    res: Response,
+    next: NextFunction
+): void {
+    const apiKey = extractBearerToken(req);
+    const nodeKey = process.env.ASGARD_NODE_KEY;
+
+    if (!apiKey) {
+        res.status(401).json({ error: 'Unauthorized', message: 'Missing Authorization header.' });
+        return;
+    }
+
+    // 1. Try Node Auth (Admin)
+    if (nodeKey && apiKey === nodeKey) {
+        // We are admin, proceed
+        next();
+        return;
+    }
+
+    // 2. Try Agent Auth
+    const agent = findAgentByApiKey(apiKey);
+    if (!agent) {
+        res.status(401).json({ error: 'Unauthorized', message: 'Invalid API key.' });
+        return;
+    }
+
+    req.agent = agent;
+    next();
+}

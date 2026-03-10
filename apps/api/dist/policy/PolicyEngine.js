@@ -44,6 +44,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PolicyEngine = void 0;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const AgentRegistry_1 = require("../vault/AgentRegistry");
 const usageStore = new Map();
 /**
  * Gets today's date in UTC as YYYY-MM-DD string.
@@ -80,7 +81,7 @@ class PolicyEngine {
      * Returns { allowed: true } or { allowed: false, violation: {...} }.
      */
     evaluate(agentId, policyProfile, intent) {
-        const policy = this.policies[policyProfile];
+        let policy = this.policies[policyProfile];
         if (!policy) {
             return {
                 allowed: false,
@@ -89,6 +90,11 @@ class PolicyEngine {
                     message: `Policy profile '${policyProfile}' not found.`,
                 },
             };
+        }
+        // Apply any custom per-agent policy overrides
+        const agentRecord = (0, AgentRegistry_1.getAgentById)(agentId);
+        if (agentRecord?.customPolicy) {
+            policy = { ...policy, ...agentRecord.customPolicy };
         }
         const usage = getAgentUsage(agentId);
         // 1. Action permission check
