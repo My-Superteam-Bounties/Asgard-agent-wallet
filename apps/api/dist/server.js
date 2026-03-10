@@ -109,7 +109,17 @@ app.get('/health', (_req, res) => {
 // Serve React Webapp statically from apps/webapp/dist
 const webappPath = path_1.default.resolve(__dirname, '../../webapp/dist');
 if (fs_1.default.existsSync(webappPath)) {
-    app.use(express_1.default.static(webappPath, { index: false }));
+    // Add custom headers to static files to prevent persistent caching of the index
+    app.use(express_1.default.static(webappPath, {
+        index: false,
+        setHeaders: (res, path) => {
+            if (path.endsWith('.html')) {
+                res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+                res.setHeader('Pragma', 'no-cache');
+                res.setHeader('Expires', '0');
+            }
+        }
+    }));
 }
 // 404 catch-all for API routes
 app.use('/v1/*', (_req, res) => {
@@ -119,6 +129,10 @@ app.use('/v1/*', (_req, res) => {
 app.get('*', (req, res) => {
     const indexPath = path_1.default.join(webappPath, 'index.html');
     if (fs_1.default.existsSync(indexPath)) {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.setHeader('Surrogate-Control', 'no-store');
         let html = fs_1.default.readFileSync(indexPath, 'utf-8');
         // Auto-inject the node key ONLY for local requests to prevent leaking keys
         // if the user accidentally exposes port 8017 to the public internet

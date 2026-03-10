@@ -126,7 +126,17 @@ app.get('/health', (_req, res) => {
 // Serve React Webapp statically from apps/webapp/dist
 const webappPath = path.resolve(__dirname, '../../webapp/dist');
 if (fs.existsSync(webappPath)) {
-    app.use(express.static(webappPath, { index: false }));
+    // Add custom headers to static files to prevent persistent caching of the index
+    app.use(express.static(webappPath, {
+        index: false,
+        setHeaders: (res, path) => {
+            if (path.endsWith('.html')) {
+                res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+                res.setHeader('Pragma', 'no-cache');
+                res.setHeader('Expires', '0');
+            }
+        }
+    }));
 }
 
 // 404 catch-all for API routes
@@ -138,6 +148,11 @@ app.use('/v1/*', (_req, res) => {
 app.get('*', (req, res) => {
     const indexPath = path.join(webappPath, 'index.html');
     if (fs.existsSync(indexPath)) {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        res.setHeader('Surrogate-Control', 'no-store');
+
         let html = fs.readFileSync(indexPath, 'utf-8');
 
         // Auto-inject the node key ONLY for local requests to prevent leaking keys
